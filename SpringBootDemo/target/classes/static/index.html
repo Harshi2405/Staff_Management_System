@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Management</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        async function saveFaculty() {
+            const faculty = {
+                facultyName: document.getElementById('facultyName').value,
+                facultyDesig: document.getElementById('facultyDepartment').value
+            };
+            const response = await fetch('/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(faculty)
+            });
+            const result = await response.json();
+            alert('Faculty Saved: ' + JSON.stringify(result));
+        }
+
+        async function fetchAllFaculties() {
+            const response = await fetch('/fetchAll');
+            const result = await response.json();
+            displayTable(result, 'fetchAllResult');
+        }
+
+        async function fetchFacultyById() {
+            const id = document.getElementById('facultyId').value;
+            const response = await fetch(`/fetchById/${id}`);
+            const result = await response.json();
+            displayTable([result], 'fetchByIdResult');
+        }
+
+        async function deleteFacultyById() {
+            const id = document.getElementById('deleteFacultyId').value;
+            const response = await fetch(`/deleteById/${id}`, {
+                method: 'DELETE'
+            });
+            const result = await response.text();
+            alert(result);
+        }
+
+        async function fetchByFacultyName() {
+        const name = document.getElementById('facultyNameFetch').value;
+        const response = await fetch('/fetchByFacultyName', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ facultyName: name })  // Send as an object with "facultyName" key
+            });
+        const result = await response.json();
+        displayTable(result, 'fetchByNameResult');
+        }
+
+
+        function displayTable(data, elementId) {
+            const tableContainer = document.getElementById(elementId);
+            tableContainer.innerHTML = '';
+
+            if (data.length === 0) {
+                tableContainer.innerHTML = '<p>No data available</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.classList.add('table', 'table-bordered', 'table-striped', 'mt-3');
+
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+
+            // Create table headers based on object keys
+            Object.keys(data[0]).forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                Object.values(item).forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+
+            tableContainer.appendChild(table);
+        }
+    </script>
+</head>
+<body class="container mt-5">
+
+<h1 class="text-center mb-5">Faculty Management System</h1>
+
+<div class="card mb-4">
+    <div class="card-header">Save Faculty</div>
+    <div class="card-body">
+        <form onsubmit="event.preventDefault(); saveFaculty();" class="form-group">
+            <div class="form-group">
+                <label for="facultyName">Name:</label>
+                <input type="text" class="form-control" id="facultyName" required>
+            </div>
+            <div class="form-group">
+                <label for="facultyDepartment">Department:</label>
+                <input type="text" class="form-control" id="facultyDepartment" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Faculty</button>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Fetch All Faculties</div>
+    <div class="card-body">
+        <button class="btn btn-secondary mb-3" onclick="fetchAllFaculties()">Fetch All</button>
+        <div id="fetchAllResult"></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Fetch Faculty by ID</div>
+    <div class="card-body">
+        <form onsubmit="event.preventDefault(); fetchFacultyById();" class="form-group">
+            <div class="form-group">
+                <label for="facultyId">Faculty ID:</label>
+                <input type="text" class="form-control" id="facultyId" required>
+            </div>
+            <button type="submit" class="btn btn-secondary">Fetch by ID</button>
+        </form>
+        <div id="fetchByIdResult"></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Delete Faculty by ID</div>
+    <div class="card-body">
+        <form onsubmit="event.preventDefault(); deleteFacultyById();" class="form-group">
+            <div class="form-group">
+                <label for="deleteFacultyId">Faculty ID:</label>
+                <input type="text" class="form-control" id="deleteFacultyId" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Delete by ID</button>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Fetch Faculty by Name</div>
+    <div class="card-body">
+        <form onsubmit="event.preventDefault(); fetchByFacultyName();" class="form-group">
+            <div class="form-group">
+                <label for="facultyNameFetch">Faculty Name:</label>
+                <input type="text" class="form-control" id="facultyNameFetch" required>
+            </div>
+            <button type="submit" class="btn btn-secondary">Fetch by Name</button>
+        </form>
+        <div id="fetchByNameResult"></div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
